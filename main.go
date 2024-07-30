@@ -2,23 +2,48 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
 func main() {
-	// the counting benchmark
-	count := 0
-	done := false
+	var (
+		scores = make([]int, 10)
+		wg     = &sync.WaitGroup{}
+		total  = 0
+		score  = 0
+	)
 
-	go func() {
-		for !done {
-			count++
-		}
-	}()
+	for i := 0; i < len(scores); i++ {
+		wg.Add(1)
+		go func(id int) {
+			scores[id] = counter()
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
 
-	time.Sleep(time.Second * 10)
-	done = false
-	score := count / 100_000
-	fmt.Printf("Counting results\nTotal time: 10 seconds\nTotal score: %d\nScore/second: %d\n",
-		score, score/10)
+	for _, v := range scores {
+		total += v
+	}
+	score = total / 10
+
+	fmt.Printf("Counting results\nScore/second: %d\n",
+		score)
+}
+
+// the counting benchmark
+func counter() int {
+	var (
+		count    = 0
+		start    = time.Now()
+		duration = time.Second * 10
+		score    = 0
+	)
+
+	for time.Since(start) < duration {
+		count++
+	}
+	score = (count / 100_000) / 10
+	return score
 }
