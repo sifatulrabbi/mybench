@@ -8,7 +8,7 @@ import (
 
 func main() {
 	var (
-		scores = make([]int, 10)
+		scores = make([]int, 1000)
 		wg     = &sync.WaitGroup{}
 		total  = 0
 		score  = 0
